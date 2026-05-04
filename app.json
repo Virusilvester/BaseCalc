@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Powerful Calculator",
-    "slug": "BaseCalc",
+    "name": "BaseCalc",
+    "slug": "basecalc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
