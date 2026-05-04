@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Powerful Calculator",
-    "slug": "powerful-calculator",
+    "slug": "BaseCalc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F0F0F"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.calculator"
