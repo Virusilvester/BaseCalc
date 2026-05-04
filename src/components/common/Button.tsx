@@ -1,21 +1,33 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Dimensions, View } from 'react-native';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
+import React from "react";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Dimensions,
+  View,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
   withSpring,
-  withTiming 
-} from 'react-native-reanimated';
-import { useTheme } from '../../context/ThemeContext';
-import { typography } from '../../theme/typography';
-import { useHaptics } from '../../hooks/useHaptics';
+} from "react-native-reanimated";
+import { useTheme } from "../../context/ThemeContext";
+import { typography } from "../../theme/typography";
+import { useHaptics } from "../../hooks/useHaptics";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 interface ButtonProps {
   label: string;
   onPress: () => void;
-  type?: 'number' | 'operator' | 'function' | 'equals' | 'danger';
+  type?:
+    | "number"
+    | "operator"
+    | "function"
+    | "equals"
+    | "danger"
+    | "memory"
+    | "active";
   span?: number;
   fontSize?: number;
   disabled?: boolean;
@@ -23,28 +35,32 @@ interface ButtonProps {
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-export const Button: React.FC<ButtonProps> = ({ 
-  label, 
-  onPress, 
-  type = 'number',
+export const Button: React.FC<ButtonProps> = ({
+  label,
+  onPress,
+  type = "number",
   span = 1,
   fontSize,
   disabled = false,
 }) => {
   const { colors } = useTheme();
   const { lightImpact } = useHaptics();
-  const scale = useSharedValue(1);
+  const scale = useSharedValue<number>(1);
 
   const getColors = () => {
     switch (type) {
-      case 'operator':
+      case "operator":
         return { bg: colors.operatorBg, text: colors.operator };
-      case 'function':
+      case "function":
         return { bg: colors.functionBg, text: colors.function };
-      case 'equals':
+      case "memory":
+        return { bg: colors.primaryLight, text: colors.primary };
+      case "active":
+        return { bg: colors.primary, text: "#FFFFFF" };
+      case "equals":
         return { bg: colors.equalsBg, text: colors.equals };
-      case 'danger':
-        return { bg: colors.error + '20', text: colors.error };
+      case "danger":
+        return { bg: colors.error + "20", text: colors.error };
       default:
         return { bg: colors.numberBg, text: colors.number };
     }
@@ -52,11 +68,14 @@ export const Button: React.FC<ButtonProps> = ({
 
   const btnColors = getColors();
   const buttonSize = (width - 48) / 4;
-  const buttonWidth = span > 1 ? buttonSize * span + (span - 1) * 8 : buttonSize;
+  const buttonWidth =
+    span > 1 ? buttonSize * span + (span - 1) * 8 : buttonSize;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }] as any,
+    };
+  });
 
   const handlePress = () => {
     if (disabled) return;
@@ -83,13 +102,15 @@ export const Button: React.FC<ButtonProps> = ({
       activeOpacity={0.7}
       disabled={disabled}
     >
-      <Text style={[
-        styles.label,
-        { 
-          color: btnColors.text,
-          fontSize: fontSize || (type === 'number' ? 28 : 24),
-        }
-      ]}>
+      <Text
+        style={[
+          styles.label,
+          {
+            color: btnColors.text,
+            fontSize: fontSize || (type === "number" ? 28 : 24),
+          },
+        ]}
+      >
         {label}
       </Text>
     </AnimatedTouchable>
@@ -99,16 +120,16 @@ export const Button: React.FC<ButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     margin: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   label: {
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

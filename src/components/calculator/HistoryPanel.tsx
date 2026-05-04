@@ -1,22 +1,25 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme/spacing';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue,
-  withTiming,
-  interpolate 
-} from 'react-native-reanimated';
+import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../context/ThemeContext";
+import { typography } from "../../theme/typography";
+import { spacing } from "../../theme/spacing";
+import { useHaptics } from "../../hooks/useHaptics";
+import type { CalculatorMode } from "../../utils/constants";
 
 export interface HistoryItem {
   id: string;
   expression: string;
   result: string;
   timestamp: Date;
-  mode: string;
+  mode: CalculatorMode;
 }
 
 interface HistoryPanelProps {
@@ -24,6 +27,7 @@ interface HistoryPanelProps {
   onSelect: (item: HistoryItem) => void;
   onClear: () => void;
   visible: boolean;
+  onClose: () => void;
 }
 
 export const HistoryPanel: React.FC<HistoryPanelProps> = ({
@@ -31,118 +35,170 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
   onSelect,
   onClear,
   visible,
+  onClose,
 }) => {
   const { colors } = useTheme();
-  const translateX = useSharedValue(visible ? 0 : 300);
-
-  React.useEffect(() => {
-    translateX.value = withTiming(visible ? 0 : 300, { duration: 300 });
-  }, [visible]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-    opacity: interpolate(translateX.value, [0, 300], [1, 0]),
-  }));
-
-  const renderItem = ({ item }: { item: HistoryItem }) => (
-    <TouchableOpacity
-      style={[styles.historyItem, { borderBottomColor: colors.border }]}
-      onPress={() => onSelect(item)}
-    >
-      <Text style={[styles.expression, { color: colors.textMuted }]}>
-        {item.expression}
-      </Text>
-      <Text style={[styles.result, { color: colors.text }]}>
-        = {item.result}
-      </Text>
-      <Text style={[styles.timestamp, { color: colors.textMuted }]}>
-        {item.timestamp.toLocaleTimeString()}
-      </Text>
-    </TouchableOpacity>
-  );
+  const { lightImpact } = useHaptics();
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor: colors.surface }, animatedStyle]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>History</Text>
-        <TouchableOpacity onPress={onClear}>
-          <Text style={[styles.clearText, { color: colors.error }]}>Clear All</Text>
-        </TouchableOpacity>
-      </View>
-
-      {history.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="time-outline" size={48} color={colors.textMuted} />
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            No calculations yet
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={history}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <TouchableOpacity
+          style={styles.backdrop}
+          onPress={onClose}
+          activeOpacity={1}
         />
-      )}
-    </Animated.View>
+
+        <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
+          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.title, { color: colors.text }]}>History</Text>
+
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={[
+                  styles.iconBtn,
+                  { backgroundColor: colors.surfaceElevated },
+                ]}
+                onPress={() => {
+                  lightImpact();
+                  onClear();
+                }}
+                activeOpacity={0.7}
+                disabled={history.length === 0}
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={18}
+                  color={history.length === 0 ? colors.textMuted : colors.text}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.iconBtn,
+                  { backgroundColor: colors.surfaceElevated },
+                ]}
+                onPress={onClose}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={18} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {history.length === 0 ? (
+            <View style={styles.empty}>
+              <Ionicons
+                name="time-outline"
+                size={28}
+                color={colors.textMuted}
+              />
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                No history yet
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={history}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.listContent}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.item,
+                    { backgroundColor: colors.surfaceElevated },
+                  ]}
+                  onPress={() => {
+                    lightImpact();
+                    onSelect(item);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[styles.expr, { color: colors.textMuted }]}
+                    numberOfLines={1}
+                  >
+                    {item.expression}
+                  </Text>
+                  <Text
+                    style={[styles.result, { color: colors.text }]}
+                    numberOfLines={1}
+                  >
+                    {item.result}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 280,
-    zIndex: 100,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 10,
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  sheet: {
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    maxHeight: "70%",
+    overflow: "hidden",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(128,128,128,0.1)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
-    ...typography.headline,
+    ...typography.title2,
   },
-  clearText: {
-    ...typography.bodySmall,
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
   },
-  list: {
-    paddingHorizontal: spacing.md,
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  historyItem: {
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-  },
-  expression: {
-    ...typography.bodySmall,
-    marginBottom: 4,
-  },
-  result: {
-    ...typography.headline,
-    marginBottom: 2,
-  },
-  timestamp: {
-    ...typography.caption,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  empty: {
+    padding: spacing.lg,
+    alignItems: "center",
+    gap: 8,
   },
   emptyText: {
     ...typography.body,
-    marginTop: spacing.md,
+  },
+  listContent: {
+    padding: spacing.md,
+    gap: 8,
+  },
+  item: {
+    borderRadius: 14,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  expr: {
+    ...typography.bodySmall,
+  },
+  result: {
+    ...typography.headline,
+    fontSize: 18,
+    marginTop: 4,
   },
 });
