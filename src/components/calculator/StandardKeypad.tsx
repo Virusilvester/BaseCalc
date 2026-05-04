@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { Button } from "../common/Button";
 
 interface StandardKeypadProps {
@@ -38,14 +38,20 @@ export const StandardKeypad: React.FC<StandardKeypadProps> = ({
   memoryHasValue,
 }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.row}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      contentContainerStyle={styles.scrollContent}
+    >
+      <View style={styles.container}>
+        <View style={styles.row}>
         <Button
           label="MC"
           onPress={onMemoryClear}
           type="memory"
           fontSize={13}
           disabled={!memoryHasValue}
+          columns={5}
         />
         <Button
           label="MR"
@@ -53,23 +59,32 @@ export const StandardKeypad: React.FC<StandardKeypadProps> = ({
           type="memory"
           fontSize={13}
           disabled={!memoryHasValue}
+          columns={5}
         />
-        <Button label="M+" onPress={onMemoryAdd} type="memory" fontSize={13} />
+        <Button
+          label="M+"
+          onPress={onMemoryAdd}
+          type="memory"
+          fontSize={13}
+          columns={5}
+        />
         <Button
           label="M-"
           onPress={onMemorySubtract}
           type="memory"
           fontSize={13}
+          columns={5}
         />
         <Button
           label="MS"
           onPress={onMemoryStore}
           type="memory"
           fontSize={13}
+          columns={5}
         />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="AC" onPress={onClear} type="danger" />
         <Button
           label="CE"
@@ -79,37 +94,37 @@ export const StandardKeypad: React.FC<StandardKeypadProps> = ({
         />
         <Button label="⌫" onPress={onBackspace} type="function" />
         <Button label="÷" onPress={() => onOperator("÷")} type="operator" />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="7" onPress={() => onNumber("7")} />
         <Button label="8" onPress={() => onNumber("8")} />
         <Button label="9" onPress={() => onNumber("9")} />
         <Button label="×" onPress={() => onOperator("×")} type="operator" />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="4" onPress={() => onNumber("4")} />
         <Button label="5" onPress={() => onNumber("5")} />
         <Button label="6" onPress={() => onNumber("6")} />
         <Button label="-" onPress={() => onOperator("-")} type="operator" />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="1" onPress={() => onNumber("1")} />
         <Button label="2" onPress={() => onNumber("2")} />
         <Button label="3" onPress={() => onNumber("3")} />
         <Button label="+" onPress={() => onOperator("+")} type="operator" />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="±" onPress={onToggleSign} type="function" />
         <Button label="0" onPress={() => onNumber("0")} />
         <Button label="." onPress={onDecimal} />
         <Button label="=" onPress={onEquals} type="equals" />
-      </View>
+        </View>
 
-      <View style={styles.row}>
+        <View style={styles.row}>
         <Button label="%" onPress={onPercentage} type="function" />
         <Button
           label="1/x"
@@ -129,12 +144,16 @@ export const StandardKeypad: React.FC<StandardKeypadProps> = ({
           type="function"
           fontSize={13}
         />
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: 8,
+  },
   container: {
     padding: 8,
   },

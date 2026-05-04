@@ -85,7 +85,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
   return (
     <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
       <View style={styles.container}>
-        {/* Base Display Panel */}
         <View
           style={[
             styles.basePanel,
@@ -140,7 +139,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
           ))}
         </View>
 
-        {/* Bit Width Selector */}
         <View
           style={[
             styles.bitWidthRow,
@@ -179,7 +177,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
           ))}
         </View>
 
-        {/* Bitwise Operations Row 1 */}
         <View style={styles.row}>
           <Button
             label="AND"
@@ -207,7 +204,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
           />
         </View>
 
-        {/* Bitwise Operations Row 2 */}
         <View style={styles.row}>
           <Button
             label="NAND"
@@ -219,7 +215,7 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
             label="NOR"
             onPress={() => onOperator("NOR")}
             type="function"
-            fontSize={11}
+            fontSize={12}
           />
           <Button
             label="<<"
@@ -235,7 +231,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
           />
         </View>
 
-        {/* Clear + Control */}
         <View style={styles.row}>
           <Button
             label="MOD"
@@ -253,7 +248,6 @@ export const ProgrammerKeypad: React.FC<ProgrammerKeypadProps> = ({
           <Button label="⌫" onPress={onBackspace} type="danger" />
         </View>
 
-        {/* Hex Letters Row */}
         <View style={styles.row}>
           <Button
             label="A"
@@ -424,3 +418,4 @@ const styles = StyleSheet.create({
     marginBottom: 7,
   },
 });
+

@@ -31,6 +31,7 @@ interface ButtonProps {
   span?: number;
   fontSize?: number;
   disabled?: boolean;
+  columns?: number;
 }
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -42,6 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
   span = 1,
   fontSize,
   disabled = false,
+  columns = 4,
 }) => {
   const { colors } = useTheme();
   const { lightImpact } = useHaptics();
@@ -67,7 +69,8 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const btnColors = getColors();
-  const buttonSize = (width - 48) / 4;
+  const clampedColumns = Math.max(1, Math.min(6, columns));
+  const buttonSize = (width - 48) / clampedColumns;
   const buttonWidth =
     span > 1 ? buttonSize * span + (span - 1) * 8 : buttonSize;
 

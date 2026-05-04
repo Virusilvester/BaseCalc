@@ -50,7 +50,11 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
   memoryHasValue,
 }) => {
   return (
-    <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.container}>
         <View style={styles.row}>
           <Button
@@ -59,6 +63,7 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             type="memory"
             fontSize={12}
             disabled={!memoryHasValue}
+            columns={5}
           />
           <Button
             label="MR"
@@ -66,24 +71,28 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             type="memory"
             fontSize={12}
             disabled={!memoryHasValue}
+            columns={5}
           />
           <Button
             label="M+"
             onPress={onMemoryAdd}
             type="memory"
             fontSize={12}
+            columns={5}
           />
           <Button
             label="M-"
             onPress={onMemorySubtract}
             type="memory"
             fontSize={12}
+            columns={5}
           />
           <Button
             label="MS"
             onPress={onMemoryStore}
             type="memory"
             fontSize={12}
+            columns={5}
           />
         </View>
 
@@ -93,30 +102,35 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             onPress={onToggleAngleMode}
             type={angleMode !== "deg" ? "active" : "function"}
             fontSize={13}
+            columns={5}
           />
           <Button
             label="INV"
             onPress={onToggleInverse}
             type={inverseMode ? "active" : "function"}
             fontSize={13}
+            columns={5}
           />
           <Button
             label="HYP"
             onPress={onToggleHyperbolic}
             type={hyperbolicMode ? "active" : "function"}
             fontSize={13}
+            columns={5}
           />
           <Button
             label="2ˣ"
             onPress={() => onScientific("2ˣ")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label="log₂"
             onPress={() => onScientific("log2")}
             type="function"
             fontSize={12}
+            columns={5}
           />
         </View>
 
@@ -126,30 +140,35 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             onPress={() => onScientific("sin")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label={inverseMode ? "cos⁻¹" : "cos"}
             onPress={() => onScientific("cos")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label={inverseMode ? "tan⁻¹" : "tan"}
             onPress={() => onScientific("tan")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label="π"
             onPress={() => onScientific("π")}
             type="function"
             fontSize={18}
+            columns={5}
           />
           <Button
             label="e"
             onPress={() => onScientific("e")}
             type="function"
             fontSize={18}
+            columns={5}
           />
         </View>
 
@@ -159,30 +178,35 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             onPress={() => onScientific(inverseMode ? "eˣ" : "ln")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label={inverseMode ? "10ˣ" : "log"}
             onPress={() => onScientific(inverseMode ? "10ˣ" : "log")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label={inverseMode ? "x²" : "√"}
             onPress={() => onScientific("√")}
             type="function"
             fontSize={16}
+            columns={5}
           />
           <Button
             label="∛x"
             onPress={() => onScientific("∛")}
             type="function"
             fontSize={15}
+            columns={5}
           />
           <Button
             label="xʸ"
             onPress={() => onOperator("^")}
             type="function"
             fontSize={14}
+            columns={5}
           />
         </View>
 
@@ -192,60 +216,100 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             onPress={() => onScientific("x²")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label="x³"
             onPress={() => onScientific("x³")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label="1/x"
             onPress={() => onScientific("1/x")}
             type="function"
             fontSize={13}
+            columns={5}
           />
           <Button
             label="x!"
             onPress={() => onScientific("x!")}
             type="function"
             fontSize={14}
+            columns={5}
           />
           <Button
             label="|x|"
             onPress={() => onScientific("|x|")}
             type="function"
             fontSize={14}
+            columns={5}
           />
         </View>
 
         <View style={styles.row}>
-          <Button label="AC" onPress={onClear} type="danger" />
-          <Button label="⌫" onPress={onBackspace} type="function" />
-          <Button label="%" onPress={onPercentage} type="function" />
-          <Button label="±" onPress={onToggleSign} type="function" />
-          <Button label="÷" onPress={() => onOperator("÷")} type="operator" />
+          <Button label="AC" onPress={onClear} type="danger" columns={5} />
+          <Button
+            label="⌫"
+            onPress={onBackspace}
+            type="function"
+            columns={5}
+          />
+          <Button
+            label="%"
+            onPress={onPercentage}
+            type="function"
+            columns={5}
+          />
+          <Button
+            label="±"
+            onPress={onToggleSign}
+            type="function"
+            columns={5}
+          />
+          <Button
+            label="÷"
+            onPress={() => onOperator("÷")}
+            type="operator"
+            columns={5}
+          />
         </View>
 
         <View style={styles.row}>
-          <Button label="7" onPress={() => onNumber("7")} />
-          <Button label="8" onPress={() => onNumber("8")} />
-          <Button label="9" onPress={() => onNumber("9")} />
-          <Button label="×" onPress={() => onOperator("×")} type="operator" />
+          <Button label="7" onPress={() => onNumber("7")} columns={4} />
+          <Button label="8" onPress={() => onNumber("8")} columns={4} />
+          <Button label="9" onPress={() => onNumber("9")} columns={4} />
+          <Button
+            label="×"
+            onPress={() => onOperator("×")}
+            type="operator"
+            columns={4}
+          />
         </View>
 
         <View style={styles.row}>
-          <Button label="4" onPress={() => onNumber("4")} />
-          <Button label="5" onPress={() => onNumber("5")} />
-          <Button label="6" onPress={() => onNumber("6")} />
-          <Button label="-" onPress={() => onOperator("-")} type="operator" />
+          <Button label="4" onPress={() => onNumber("4")} columns={4} />
+          <Button label="5" onPress={() => onNumber("5")} columns={4} />
+          <Button label="6" onPress={() => onNumber("6")} columns={4} />
+          <Button
+            label="-"
+            onPress={() => onOperator("-")}
+            type="operator"
+            columns={4}
+          />
         </View>
 
         <View style={styles.row}>
-          <Button label="1" onPress={() => onNumber("1")} />
-          <Button label="2" onPress={() => onNumber("2")} />
-          <Button label="3" onPress={() => onNumber("3")} />
-          <Button label="+" onPress={() => onOperator("+")} type="operator" />
+          <Button label="1" onPress={() => onNumber("1")} columns={4} />
+          <Button label="2" onPress={() => onNumber("2")} columns={4} />
+          <Button label="3" onPress={() => onNumber("3")} columns={4} />
+          <Button
+            label="+"
+            onPress={() => onOperator("+")}
+            type="operator"
+            columns={4}
+          />
         </View>
 
         <View style={styles.row}>
@@ -254,10 +318,11 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
             onPress={() => onScientific("rand")}
             type="function"
             fontSize={12}
+            columns={4}
           />
-          <Button label="0" onPress={() => onNumber("0")} />
-          <Button label="." onPress={onDecimal} />
-          <Button label="=" onPress={onEquals} type="equals" />
+          <Button label="0" onPress={() => onNumber("0")} columns={4} />
+          <Button label="." onPress={onDecimal} columns={4} />
+          <Button label="=" onPress={onEquals} type="equals" columns={4} />
         </View>
       </View>
     </ScrollView>
@@ -265,6 +330,9 @@ export const ScientificKeypad: React.FC<ScientificKeypadProps> = ({
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: 8,
+  },
   container: {
     padding: 8,
   },
@@ -274,3 +342,4 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 });
+

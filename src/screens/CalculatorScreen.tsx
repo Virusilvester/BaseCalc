@@ -495,5 +495,6 @@ const styles = StyleSheet.create({
   keypadContainer: {
     flex: 1,
     justifyContent: "flex-end",
+    paddingTop: 4,
   },
 });
