@@ -430,11 +430,14 @@ export const CalculatorScreen: React.FC = () => {
           />
         </TouchableOpacity>
 
-        <ModeSelector
-          modes={CALCULATOR_MODES.map((m) => ({ id: m.id, label: m.label }))}
-          activeMode={mode}
-          onSelect={handleModeChange}
-        />
+        <View style={styles.modeSelectorWrap}>
+          <ModeSelector
+            modes={CALCULATOR_MODES.map((m) => ({ id: m.id, label: m.label }))}
+            activeMode={mode}
+            onSelect={handleModeChange}
+            compact
+          />
+        </View>
 
         <TouchableOpacity
           onPress={() => setShowHistory(!showHistory)}
@@ -485,6 +488,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  modeSelectorWrap: {
+    flex: 1,
+    marginHorizontal: 8,
+    minWidth: 0,
+  },
   iconBtn: {
     width: 36,
     height: 36,
@@ -496,5 +504,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     paddingTop: 4,
+    minHeight: 0,
   },
 });

@@ -65,7 +65,11 @@ export const SettingsScreen: React.FC = () => {
         <Text style={[styles.title, { color: colors.text }]}>Settings</Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        contentInsetAdjustmentBehavior="automatic"
+      >
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>APPEARANCE</Text>
           <Card padding={0}>
@@ -137,6 +141,9 @@ export const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xl,
   },
   header: {
     paddingHorizontal: spacing.lg,

@@ -1,104 +1,129 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme/spacing';
-import { Card } from '../common/Card';
-import { DateEngine, DateResult } from '../../calculator/engine/DateEngine';
-import { formatDate } from '../../utils/formatters';
-import { useHaptics } from '../../hooks/useHaptics';
+import React, { useMemo, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Modal,
+  Platform,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../context/ThemeContext";
+import { typography } from "../../theme/typography";
+import { spacing } from "../../theme/spacing";
+import { Card } from "../common/Card";
+import { DateEngine, DateResult } from "../../calculator/engine/DateEngine";
+import { formatDate } from "../../utils/formatters";
+import { useHaptics } from "../../hooks/useHaptics";
 
 export const DateCalculator: React.FC = () => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { mediumImpact } = useHaptics();
+  const tabBarHeight = useBottomTabBarHeight();
 
-  const today = new Date();
-  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const today = useMemo(() => new Date(), []);
+  const nextWeek = useMemo(
+    () => new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000),
+    [today],
+  );
 
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(nextWeek);
   const [result, setResult] = useState<DateResult | null>(null);
-  const [mode, setMode] = useState<'diff' | 'add'>('diff');
+  const [mode, setMode] = useState<"diff" | "add">("diff");
   const [addDays, setAddDays] = useState(30);
 
-  const [startDateStr, setStartDateStr] = useState(formatDateInput(today));
-  const [endDateStr, setEndDateStr] = useState(formatDateInput(nextWeek));
+  const [pickerField, setPickerField] = useState<"start" | "end" | null>(null);
 
-  const engine = new DateEngine();
+  const engine = useMemo(() => new DateEngine(), []);
 
-  function formatDateInput(date: Date): string {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
+  const openPicker = (field: "start" | "end") => {
+    setPickerField(field);
+  };
 
-  function parseDateInput(str: string): Date | null {
-    const parts = str.split('-');
-    if (parts.length !== 3) return null;
-    const y = parseInt(parts[0]);
-    const m = parseInt(parts[1]) - 1;
-    const d = parseInt(parts[2]);
-    const date = new Date(y, m, d);
-    if (isNaN(date.getTime())) return null;
-    return date;
-  }
+  const closePicker = () => {
+    setPickerField(null);
+  };
+
+  const setDateForField = (field: "start" | "end", date: Date) => {
+    if (field === "start") {
+      setStartDate(date);
+      if (mode === "add") setEndDate(date);
+    } else {
+      setEndDate(date);
+    }
+    setResult(null);
+  };
 
   const calculateDifference = () => {
-    const s = parseDateInput(startDateStr);
-    const e = parseDateInput(endDateStr);
-    if (!s || !e) return;
-
     mediumImpact();
-    setStartDate(s);
-    setEndDate(e);
-    const res = engine.calculateDifference(s, e);
-    setResult(res);
+    setResult(engine.calculateDifference(startDate, endDate));
   };
 
   const calculateAddDays = () => {
-    const s = parseDateInput(startDateStr);
-    if (!s) return;
-
     mediumImpact();
-    setStartDate(s);
-    const res = engine.addDays(s, addDays);
+    const res = engine.addDays(startDate, addDays);
     setEndDate(res);
-    setEndDateStr(formatDateInput(res));
-    const diff = engine.calculateDifference(s, res);
-    setResult(diff);
+    setResult(engine.calculateDifference(startDate, res));
   };
 
+  const pickerValue = pickerField === "end" ? endDate : startDate;
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={[
+        styles.container,
+        { paddingBottom: spacing.xl + tabBarHeight },
+      ]}
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      contentInsetAdjustmentBehavior="automatic"
+    >
       {/* Mode Toggle */}
-      <View style={[styles.modeToggle, { backgroundColor: colors.surfaceElevated }]}>
+      <View
+        style={[styles.modeToggle, { backgroundColor: colors.surfaceElevated }]}
+      >
         <TouchableOpacity
           style={[
             styles.modeButton,
-            mode === 'diff' && { backgroundColor: colors.primary }
+            mode === "diff" && { backgroundColor: colors.primary },
           ]}
-          onPress={() => setMode('diff')}
+          onPress={() => {
+            setMode("diff");
+            setResult(null);
+          }}
         >
-          <Text style={[
-            styles.modeText,
-            { color: mode === 'diff' ? '#FFF' : colors.textSecondary }
-          ]}>
+          <Text
+            style={[
+              styles.modeText,
+              { color: mode === "diff" ? "#FFF" : colors.textSecondary },
+            ]}
+          >
             Difference
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.modeButton,
-            mode === 'add' && { backgroundColor: colors.primary }
+            mode === "add" && { backgroundColor: colors.primary },
           ]}
-          onPress={() => setMode('add')}
+          onPress={() => {
+            setMode("add");
+            setEndDate(startDate);
+            setResult(null);
+          }}
         >
-          <Text style={[
-            styles.modeText,
-            { color: mode === 'add' ? '#FFF' : colors.textSecondary }
-          ]}>
+          <Text
+            style={[
+              styles.modeText,
+              { color: mode === "add" ? "#FFF" : colors.textSecondary },
+            ]}
+          >
             Add/Subtract
           </Text>
         </TouchableOpacity>
@@ -110,34 +135,48 @@ export const DateCalculator: React.FC = () => {
           <Ionicons name="calendar-outline" size={20} color={colors.primary} />
           <View style={styles.dateInfo}>
             <Text style={[styles.dateLabel, { color: colors.textMuted }]}>
-              {mode === 'diff' ? 'Start Date' : 'From Date'}
+              {mode === "diff" ? "Start Date" : "From Date"}
             </Text>
-            <TextInput
-              style={[styles.dateInput, { color: colors.text }]}
-              value={startDateStr}
-              onChangeText={setStartDateStr}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={colors.textMuted}
-              keyboardType="numbers-and-punctuation"
-            />
+            <TouchableOpacity
+              style={[
+                styles.datePickerBtn,
+                { backgroundColor: colors.surfaceElevated },
+              ]}
+              onPress={() => openPicker("start")}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.dateValue, { color: colors.text }]}>
+                {formatDate(startDate)}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
           </View>
         </View>
 
-        {mode === 'diff' && (
+        {mode === "diff" && (
           <View style={[styles.dateRow, styles.borderTop]}>
             <Ionicons name="calendar" size={20} color={colors.secondary} />
             <View style={styles.dateInfo}>
               <Text style={[styles.dateLabel, { color: colors.textMuted }]}>
                 End Date
               </Text>
-              <TextInput
-                style={[styles.dateInput, { color: colors.text }]}
-                value={endDateStr}
-                onChangeText={setEndDateStr}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="numbers-and-punctuation"
-              />
+              <TouchableOpacity
+                style={[
+                  styles.datePickerBtn,
+                  { backgroundColor: colors.surfaceElevated },
+                ]}
+                onPress={() => openPicker("end")}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.dateValue, { color: colors.text }]}>
+                  {formatDate(endDate)}
+                </Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={16}
+                  color={colors.textMuted}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -180,31 +219,37 @@ export const DateCalculator: React.FC = () => {
 
       {/* Quick Presets */}
       <View style={styles.presetsContainer}>
-        {mode === 'add' && [
+        {mode === "add" &&
+          [
           { label: '+7 days', val: 7 },
           { label: '+30 days', val: 30 },
           { label: '+90 days', val: 90 },
           { label: '+1 year', val: 365 },
-        ].map((preset) => (
-          <TouchableOpacity
-            key={preset.val}
-            style={[styles.presetButton, { backgroundColor: colors.surfaceElevated }]}
-            onPress={() => setAddDays(preset.val)}
-          >
-            <Text style={[styles.presetText, { color: colors.primary }]}>
-              {preset.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+          ].map((preset) => (
+            <TouchableOpacity
+              key={preset.val}
+              style={[
+                styles.presetButton,
+                { backgroundColor: colors.surfaceElevated },
+              ]}
+              onPress={() => setAddDays(preset.val)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.presetText, { color: colors.primary }]}>
+                {preset.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
       </View>
 
       {/* Calculate Button */}
       <TouchableOpacity
         style={[styles.calculateButton, { backgroundColor: colors.primary }]}
-        onPress={mode === 'diff' ? calculateDifference : calculateAddDays}
+        onPress={mode === "diff" ? calculateDifference : calculateAddDays}
+        activeOpacity={0.85}
       >
         <Text style={styles.calculateText}>
-          {mode === 'diff' ? 'Calculate Difference' : 'Calculate Date'}
+          {mode === "diff" ? "Calculate Difference" : "Calculate Date"}
         </Text>
       </TouchableOpacity>
 
@@ -225,7 +270,71 @@ export const DateCalculator: React.FC = () => {
           </View>
         </Card>
       )}
-    </View>
+      {!!pickerField && (
+        <>
+          {Platform.OS === "ios" ? (
+            <Modal transparent animationType="fade" onRequestClose={closePicker}>
+              <View
+                style={[styles.pickerOverlay, { backgroundColor: colors.overlay }]}
+              >
+                <TouchableOpacity
+                  style={styles.pickerBackdrop}
+                  activeOpacity={1}
+                  onPress={closePicker}
+                />
+                <View
+                  style={[
+                    styles.pickerSheet,
+                    { backgroundColor: colors.surfaceElevated },
+                  ]}
+                >
+                  <View style={styles.pickerHeader}>
+                    <Text style={[styles.pickerTitle, { color: colors.text }]}>
+                      Select date
+                    </Text>
+                    <TouchableOpacity
+                      onPress={closePicker}
+                      style={[
+                        styles.pickerDone,
+                        { backgroundColor: colors.primary },
+                      ]}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={styles.pickerDoneText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={pickerValue}
+                    mode="date"
+                    display="inline"
+                    themeVariant={isDark ? "dark" : "light"}
+                    onChange={(_, date) => {
+                      if (!date || !pickerField) return;
+                      setDateForField(pickerField, date);
+                    }}
+                  />
+                </View>
+              </View>
+            </Modal>
+          ) : (
+            <DateTimePicker
+              value={pickerValue}
+              mode="date"
+              display="calendar"
+              onChange={(event, date) => {
+                if (event.type === "dismissed") {
+                  closePicker();
+                  return;
+                }
+                if (!date || !pickerField) return;
+                setDateForField(pickerField, date);
+                closePicker();
+              }}
+            />
+          )}
+        </>
+      )}
+    </ScrollView>
   );
 };
 
@@ -240,8 +349,10 @@ const ResultItem: React.FC<{ label: string; value: string }> = ({ label, value }
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
+  },
+  container: {
     padding: spacing.md,
   },
   modeToggle: {
@@ -280,10 +391,17 @@ const styles = StyleSheet.create({
     ...typography.caption,
     marginBottom: 4,
   },
-  dateInput: {
+  datePickerBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 12,
+  },
+  dateValue: {
     ...typography.headline,
-    padding: 0,
-    minWidth: 120,
+    fontSize: 16,
   },
   daysInput: {
     flexDirection: 'row',
@@ -364,5 +482,39 @@ const styles = StyleSheet.create({
   },
   resultItemLabel: {
     ...typography.caption,
+  },
+  pickerOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  pickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  pickerSheet: {
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    overflow: "hidden",
+    paddingBottom: spacing.md,
+  },
+  pickerHeader: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pickerTitle: {
+    ...typography.title2,
+  },
+  pickerDone: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  pickerDoneText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

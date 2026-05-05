@@ -32,11 +32,15 @@ export class ProgrammerEngine {
 
   private normalizeOperator(op: string): string {
     switch (op) {
-      case "Ã—":
+      // Multiply
+      case "Ãƒâ€”": // mojibake of "×"
+      case "Ã—": // mojibake of "×"
       case "×":
       case "*":
         return "×";
-      case "Ã·":
+      // Divide
+      case "ÃƒÂ·": // mojibake of "÷"
+      case "Ã·": // mojibake of "÷"
       case "÷":
       case "/":
         return "÷";
@@ -80,15 +84,18 @@ export class ProgrammerEngine {
     const bits = this.bitWidth;
     if (bits === 64) return val;
 
-    const mask = (1 << bits) - 1;
-    val = val & mask;
-    if (this.isSigned && bits < 64) {
-      const signBit = 1 << (bits - 1);
-      if (val & signBit) {
-        val = val - (1 << bits);
-      }
+    // JS bitwise operators are 32-bit signed; `(1 << 32)` is broken (shift count mod 32),
+    // so handle 32-bit explicitly to avoid a zero mask.
+    if (bits === 32) {
+      return this.isSigned ? (val | 0) : (val >>> 0);
     }
-    return val;
+
+    const mask = (1 << bits) - 1;
+    const masked = val & mask;
+    if (!this.isSigned) return masked;
+
+    const signBit = 1 << (bits - 1);
+    return masked & signBit ? masked - (1 << bits) : masked;
   }
 
   input(digit: string): void {
@@ -278,14 +285,29 @@ export class ProgrammerEngine {
     const decimal = this.toDecimal(this.currentValue);
     if (decimal === null) return Array(this.bitWidth).fill(false);
 
-    const bits: boolean[] = [];
-    const mask =
-      this.bitWidth === 64 ? Number.MAX_SAFE_INTEGER : (1 << this.bitWidth) - 1;
-    const val = decimal & mask;
+    const width = this.bitWidth;
 
-    for (let i = this.bitWidth - 1; i >= 0; i--) {
-      bits.push((val & (1 << i)) !== 0);
+    if (width === 64) {
+      // JS Number can't represent true 64-bit bit patterns reliably.
+      return Array(64).fill(false);
+    }
+
+    const bits: boolean[] = [];
+
+    if (width === 32) {
+      const unsigned = (decimal | 0) >>> 0;
+      for (let i = 31; i >= 0; i--) {
+        bits.push(((unsigned >>> i) & 1) === 1);
+      }
+      return bits;
+    }
+
+    const mask = (1 << width) - 1;
+    const unsigned = (decimal & mask) >>> 0;
+    for (let i = width - 1; i >= 0; i--) {
+      bits.push(((unsigned >>> i) & 1) === 1);
     }
     return bits;
   }
 }
+

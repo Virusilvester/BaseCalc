@@ -15,22 +15,33 @@ interface ModeSelectorProps {
   modes: { id: string; label: string }[];
   activeMode: string;
   onSelect: (mode: string) => void;
+  compact?: boolean;
 }
 
 export const ModeSelector: React.FC<ModeSelectorProps> = ({ 
   modes, 
   activeMode, 
-  onSelect 
+  onSelect,
+  compact = false,
 }) => {
   const { colors } = useTheme();
   const { lightImpact } = useHaptics();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <View
+      style={[
+        styles.container,
+        compact && styles.containerCompact,
+        { backgroundColor: colors.surface },
+      ]}
+    >
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          compact && styles.scrollContentCompact,
+        ]}
       >
         {modes.map((mode) => (
           <ModeButton
@@ -93,9 +104,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(128,128,128,0.1)',
   },
+  containerCompact: {
+    paddingVertical: 0,
+    borderBottomWidth: 0,
+  },
   scrollContent: {
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
+  },
+  scrollContentCompact: {
+    paddingHorizontal: 0,
+    gap: 8,
   },
   button: {
     paddingHorizontal: spacing.lg,
