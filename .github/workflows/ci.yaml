@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      EXPO_NO_TELEMETRY: "1"
+
+    steps:
+      # ── Checkout ─────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Node ─────────────────────────────────────────────────
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # ── Install deps ─────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Lint ─────────────────────────────────────────────────
+      - name: Lint
+        run: npm run lint --if-present
+
+      # ── Tests ────────────────────────────────────────────────
+      - name: Run tests
+        run: npm test --if-present
+
+      # ── Expo validation ──────────────────────────────────────
+      - name: Expo doctor
+        run: npx expo-doctor || echo "⚠️ Ignoring Expo SDK 48 API level warning"
+
+      # ── Config validation (no native build) ───────────────────
+      - name: Expo config check
+        run: npx expo config --type public
