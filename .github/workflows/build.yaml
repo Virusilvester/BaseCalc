@@ -109,7 +109,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           mv android/app/build/outputs/apk/release/app-release.apk \
-             android/app/build/outputs/apk/release/LoanTracker-${VERSION}.apk
+             android/app/build/outputs/apk/release/BaseCalc-${VERSION}.apk
 
       # ── Upload Debug APK ─────────────────────────────────────
       - name: Upload Debug APK
@@ -135,10 +135,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          name: "LoanTracker ${{ github.ref_name }}"
+          name: "BaseCalc ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
           body: |
-            ## 📦 LoanTracker ${{ github.ref_name }}
+            ## 📦 BaseCalc ${{ github.ref_name }}
 
             ### Installation
             1. Download the APK below
@@ -149,6 +149,6 @@ jobs:
             ${{ github.event.head_commit.message }}
           draft: false
           prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
-          files: android/app/build/outputs/apk/release/LoanTracker-${{ github.ref_name }}.apk
+          files: android/app/build/outputs/apk/release/BaseCalc-${{ github.ref_name }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
